@@ -1,11 +1,14 @@
 import { useState } from 'react'
-import { Container, Stack, Center, Button } from '@chakra-ui/react'
+import { Container, Stack, Center, Button, useDisclosure } from '@chakra-ui/react'
 import { Head } from './components/Head'
 import { Board } from './components/Board'
 import { IsTurnOf } from './components/IsTurnOf'
-import { INITIAL_BOARD, GAME_STATUS, INITIAL_TURN, TURN } from './constants'
+import { SuccessModal } from './components/SuccessModal'
+import { INITIAL_BOARD, GAME_STATUS, INITIAL_TURN, TURN, WINNING_MOVES } from './constants'
 
 export const App = () => {
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const [gameStatus, setGameStatus] = useState(GAME_STATUS.PENDING)
   const [turn, setTurn] = useState(INITIAL_TURN)
@@ -23,48 +26,83 @@ export const App = () => {
     resetGame()
   }
 
-  const updateSquare = (squareIndex) => {
+  const isCurrentTurnWin = (turn, board) => {
+    for (const move of WINNING_MOVES) {
+      const [a, b, c] = move
+      if (board[a] === turn && 
+        board[b] === turn &&
+        board[c] === turn) {
+          console.log('You Win!')
+          return true
+        }
+    }
+    return false
+  }
 
-    if (board[squareIndex] !== null) return
+  const getNewBoard = (squareIndex) => {
+    const newBoard = [...board]
+    newBoard[squareIndex] = turn
+    return newBoard
+  }
 
-    setBoard(currentBoard => {
-      const newBoard = currentBoard
-      newBoard[squareIndex] = turn
-      return [...newBoard]
-    })
+  const checkIsCurrentTurnWin = (newBoard) => {
+    if ( isCurrentTurnWin(turn, newBoard) ) {
+      onOpen()
+    } else {
+      setTurn(currentTurn => currentTurn === TURN.X ? TURN.O : TURN.X)
+    }
+  }
 
-    setTurn(currentTurn => currentTurn === TURN.X ? TURN.O : TURN.X)
+  const processTurnMovement = (squareIndex) => {
+
+    if (gameStatus !== GAME_STATUS.STARTED || board[squareIndex] !== null) return
+
+    const newBoard = getNewBoard(squareIndex)
+    setBoard(newBoard)
+
+    checkIsCurrentTurnWin(newBoard)
   }
 
   const handleSquareClick = (squareIndex) => {
-    console.log(squareIndex)
-    updateSquare(squareIndex)
+    processTurnMovement(squareIndex)
+  }
+
+  const handleSuccessModalClose = () => {
+    resetGame()
+    onClose()
   }
 
   return (
-    <Container maxW='2xl'>
-      <Stack gap='1.4rem'>
-        <Head />
-        <Board 
-          currentBoard={ board }
-          onHandleClick={ handleSquareClick }
-        />
+    <>
+      <Container maxW='lg'>
+        <Stack gap='1.4rem'>
+          <Head />
+          <Board 
+            currentBoard={ board }
+            onHandleClick={ handleSquareClick }
+          />
 
-        {gameStatus === GAME_STATUS.STARTED && (
-          <IsTurnOf turn={ turn } />
-        )}
+          {gameStatus === GAME_STATUS.STARTED && (
+            <IsTurnOf turn={ turn } />
+          )}
 
-        <Center>
-          <Button 
-            colorScheme='red' 
-            w='12rem'
-            onClick={ handleStartGame }
-          >
-            { gameStatus === GAME_STATUS.PENDING ? 'Start Game' : 'Reset Game' }
-          </Button>
-        </Center>
-        
-      </Stack>
-    </Container>
+          <Center>
+            <Button 
+              colorScheme='red' 
+              w='12rem'
+              onClick={ handleStartGame }
+            >
+              { gameStatus === GAME_STATUS.PENDING ? 'Start Game' : 'Reset Game' }
+            </Button>
+          </Center>
+          
+        </Stack>
+      </Container>
+      <SuccessModal 
+        isOpen={ isOpen } 
+        onClose={ handleSuccessModalClose } 
+        turn={ turn } 
+      />
+    </>
   )
 }
