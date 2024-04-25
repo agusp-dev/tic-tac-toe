@@ -1,6 +1,6 @@
 import { Stack, Heading } from '@chakra-ui/react'
 
-export const Title = () => (
+export const Head = () => (
   <Stack pt='2rem' >
     <Heading
       as='h1' 

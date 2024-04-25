@@ -1,18 +1,25 @@
+import PropTypes from 'prop-types'
 import { SimpleGrid } from '@chakra-ui/react'
 import { Square } from './Square'
 
-export const Board = () => {
+export const Board = ({ currentBoard, onHandleClick }) => {
 
-  const board = Array(9).fill(null)
-
+  console.log('currentBoard', currentBoard)
 
   return (
     <SimpleGrid columns={3} spacing={6}>
-      {board?.map((square, index) => (
-        <Square key={ index }>
-          { index }
-        </Square>
+      {currentBoard?.map((square, index) => (
+        <div key={ index } onClick={ () => onHandleClick(index) }>
+          <Square>
+            {square || ''}
+          </Square>
+        </div>
       ))}
     </SimpleGrid>
   )
+}
+
+Board.propTypes = {
+  currentBoard: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onHandleClick: PropTypes.func.isRequired
 }
