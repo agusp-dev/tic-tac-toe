@@ -1,9 +1,10 @@
+import PropTypes from 'prop-types'
 import { Flex, Text } from '@chakra-ui/react'
 
 export const Square = ({ children }) => {
   return (
     <Flex 
-      h='10rem' 
+      h='7rem' 
       alignItems='center' 
       justifyContent='center'
       border='1px solid'
@@ -14,7 +15,11 @@ export const Square = ({ children }) => {
         cursor: 'pointer',
       }}
     >
-      <Text fontSize='5.5rem' fontWeight={600}>{ children }</Text>
+      <Text fontSize='5rem' fontWeight={500}>{ children }</Text>
     </Flex>
   )
+}
+
+Square.propTypes = {
+  children: PropTypes.node.isRequired,
 }
